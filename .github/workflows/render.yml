@@ -1,0 +1,19 @@
+name: Render Remotion Video
+on:
+  workflow_dispatch: # Menjalankan render secara manual lewat tombol di GitHub
+
+jobs:
+  render:
+    name: Render video
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npx remotion render RubyGeminiVoxel out/ruby-gemini-voxel-60fps.mp4 --gl=swangle --image-format=jpeg --jpeg-quality=90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ruby-gemini-voxel-60fps
+          path: out/ruby-gemini-voxel-60fps.mp4
