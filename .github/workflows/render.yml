@@ -1,18 +1,30 @@
 name: Render Remotion Video
 on:
-  workflow_dispatch: # Menjalankan render secara manual lewat tombol di GitHub
+  workflow_dispatch:
 
 jobs:
   render:
     name: Render video
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
-      - run: npm install
-      - run: npx remotion render RubyGeminiVoxel out/ruby-gemini-voxel-60fps.mp4 --gl=swangle --image-format=jpeg --jpeg-quality=90
+          node-version: 24
+
+      # Install library sistem Linux yang dibutuhkan Chromium headless
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2t64 libpangocairo-1.0-0
+
+      - name: Install project dependencies
+        run: npm install
+
+      # Batasi concurrency=2 agar RAM 7GB GitHub Actions tidak penuh (OOM)
+      - name: Render Remotion
+        run: npx remotion render RubyGeminiVoxel out/ruby-gemini-voxel-60fps.mp4 --concurrency=2 --gl=swangle --image-format=jpeg --jpeg-quality=90
+
       - uses: actions/upload-artifact@v4
         with:
           name: ruby-gemini-voxel-60fps
